@@ -17,7 +17,7 @@ Lệnh biên dịch thủ công (chuẩn C++17):
 - g++ -std=c++17 -Wall -Wextra -pedantic decrypt.cpp -o decrypt
 - Sau đó chạy: echo "hello FIT4012 AES" | ./encrypt
 - Và: ./decrypt
-
+//hi
 ## 3. Input / Output
 - Đầu vào (Input):
     - encrypt.cpp: Nhận văn bản trực tiếp từ bàn phím qua cin.getline().
