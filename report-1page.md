@@ -35,3 +35,4 @@ Khi Tamper (chỉnh sửa file message.aes), chương trình báo lỗi do sai c
 
 ## Kết luận / Conclusion
 Bài lab đã hoàn thành đầy đủ các yêu cầu về bảo mật cơ bản. Việc sử dụng struct Header và chuẩn padding quốc tế (PKCS#7) giúp hệ thống hoạt động ổn định và chuyên nghiệp hơn. Đây là nền tảng quan trọng để tiếp cận các giao thức truyền tin an toàn trong môn học Cybersecurity.
+//quan
