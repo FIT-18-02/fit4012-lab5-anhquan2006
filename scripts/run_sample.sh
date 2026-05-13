@@ -7,7 +7,7 @@ mkdir -p logs
 
 echo "--- Đang biên dịch mã nguồn (make all) ---"
 make all
-
+//quan
 PLAINTEXT="hello FIT4012 AES"
 
 {
