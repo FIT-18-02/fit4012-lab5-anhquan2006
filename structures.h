@@ -21,7 +21,17 @@ struct Packet {
 // --- PHẦN 2: CÁC BẢNG TRA CỨU ---
 
 // S-box cho Encryption
-unsigned char s[256] = {
+extern unsigned char s[256];
+// Inverse S-box cho Decryption
+extern unsigned char inv_s[256];
+
+// Bảng tra cứu cho MixColumns và Inverse MixColumns
+extern unsigned char mul2[256], mul3[256];
+extern unsigned char mul9[256], mul11[256], mul13[256], mul14[256];
+extern unsigned char rcon[11];
+
+// Định nghĩa dữ liệu trực tiếp trong header (Dùng static để tránh lỗi trùng lặp khi include nhiều nơi)
+static unsigned char s[256] = {
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
     0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
     0xb7, 0xfd, 0x93, 0x26, 0x36, 0x3f, 0xf7, 0xcc, 0x34, 0xa5, 0xe5, 0xf1, 0x71, 0xd8, 0x31, 0x15,
@@ -40,8 +50,7 @@ unsigned char s[256] = {
     0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16
 };
 
-// Inverse S-box cho Decryption
-unsigned char inv_s[256] = {
+static unsigned char inv_s[256] = {
     0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb,
     0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb,
     0x54, 0x7b, 0x94, 0x32, 0xa6, 0xc2, 0x23, 0x3d, 0xee, 0x4c, 0x95, 0x0b, 0x42, 0xfa, 0xc3, 0x4e,
@@ -60,24 +69,19 @@ unsigned char inv_s[256] = {
     0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d
 };
 
-// Bảng tra cứu cho MixColumns
-unsigned char mul2[256], mul3[256];
-// Bảng tra cứu cho Inverse MixColumns
-unsigned char mul9[256], mul11[256], mul13[256], mul14[256];
-
-unsigned char rcon[11] = { 0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36 };
+static unsigned char mul2[256], mul3[256];
+static unsigned char mul9[256], mul11[256], mul13[256], mul14[256];
+static unsigned char rcon[11] = { 0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36 };
 
 // --- PHẦN 3: HÀM KHỞI TẠO BẢNG VÀ KEY EXPANSION ---
 
-// Hàm khởi tạo các bảng mul (Quân cần gọi hàm này một lần ở đầu main)
-void buildTables() {
+inline void buildTables() {
     for (int i = 0; i < 256; i++) {
         unsigned char a = (unsigned char)i;
         unsigned char a2 = (a & 0x80) ? (a << 1) ^ 0x1b : (a << 1);
         mul2[i] = a2;
         mul3[i] = a2 ^ a;
         
-        // Dành cho Inverse MixColumns
         unsigned char a4 = (a2 & 0x80) ? (a2 << 1) ^ 0x1b : (a2 << 1);
         unsigned char a8 = (a4 & 0x80) ? (a4 << 1) ^ 0x1b : (a4 << 1);
         mul9[i] = a8 ^ a;
@@ -87,14 +91,14 @@ void buildTables() {
     }
 }
 
-void KeyExpansionCore(unsigned char * in, unsigned char i) {
+inline void KeyExpansionCore(unsigned char * in, unsigned char i) {
     unsigned char t = in[0];
     in[0] = in[1]; in[1] = in[2]; in[2] = in[3]; in[3] = t;
     in[0] = s[in[0]]; in[1] = s[in[1]]; in[2] = s[in[2]]; in[3] = s[in[3]];
     in[0] ^= rcon[i];
 }
 
-void KeyExpansion(unsigned char inputKey[16], unsigned char expandedKeys[176]) {
+inline void KeyExpansion(unsigned char inputKey[16], unsigned char expandedKeys[176]) {
     for (int i = 0; i < 16; i++) expandedKeys[i] = inputKey[i];
     int bytesGenerated = 16, rconIteration = 1;
     unsigned char tmpCore[4];
