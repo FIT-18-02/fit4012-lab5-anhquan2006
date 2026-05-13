@@ -14,7 +14,7 @@ void SubRoundKey(unsigned char * state, unsigned char * roundKey) {
         state[i] ^= roundKey[i];
     }
 }
-
+//quan
 void InverseMixColumns(unsigned char * state) {
     unsigned char tmp[16];
     for (int i = 0; i < 4; i++) {
