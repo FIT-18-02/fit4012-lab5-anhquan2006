@@ -18,7 +18,7 @@ void AddRoundKey(unsigned char * state, unsigned char * roundKey) {
 		state[i] ^= roundKey[i];
 	}
 }
-
+//quan
 /* Perform substitution to each of the 16 bytes
  * Uses S-box as lookup table
  */
