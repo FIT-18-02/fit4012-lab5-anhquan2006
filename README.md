@@ -6,24 +6,24 @@
 ```text
 .
 ├── .github/
-│   ├── scripts/
-│   │   └── check_submission.sh
-│   └── workflows/
-│       └── ci.yml
+│   ├── scripts/
+│   │   └── check_submission.sh
+│   └── workflows/
+│       └── ci.yml
 ├── docs/
-│   └── aes-code-notes.md
+│   └── aes-code-notes.md
 ├── logs/
-│   ├── .gitkeep
-│   ├── README.md
-│   └── sample-run.log
+│   ├── .gitkeep
+│   ├── README.md
+│   └── sample-run.log
 ├── scripts/
-│   └── run_sample.sh
+│   └── run_sample.sh
 ├── tests/
-│   ├── test_aes_compile.sh
-│   ├── test_encrypt_decrypt_roundtrip.sh
-│   ├── test_multiblock_padding.sh
-│   ├── test_tamper_negative.sh
-│   └── test_wrong_key_negative.sh
+│   ├── test_aes_compile.sh
+│   ├── test_encrypt_decrypt_roundtrip.sh
+│   ├── test_multiblock_padding.sh
+│   ├── test_tamper_negative.sh
+│   └── test_wrong_key_negative.sh
 ├── .gitignore
 ├── CMakeLists.txt
 ├── Makefile
@@ -89,19 +89,25 @@ Cả hai chương trình đều đọc khóa AES-128 từ file `keyfile`. File `
 
 ## 5. Padding đang dùng
 
-Code hiện tại dùng **zero padding**: nếu plaintext không chia hết cho 16 byte, chương trình thêm byte `0x00` cho đủ block 128-bit.
+**Loại Padding**: Hiện tại mã nguồn đã được nâng cấp lên PKCS#7 Padding.
 
-Lưu ý: zero padding phù hợp để minh họa nhập môn, nhưng không phải lựa chọn an toàn/đầy đủ cho ứng dụng thực tế vì có thể gây nhập nhằng giữa byte dữ liệu thật `0x00` và byte padding.
+**Mô tả**: AES yêu cầu dữ liệu đầu vào phải là bội số của 16 byte. Nếu dữ liệu không đủ, chương trình sẽ tự động thêm các byte có giá trị bằng chính số lượng byte cần đệm.
+
+**Ưu điểm**: Khác với Zero Padding, PKCS#7 giúp việc giải mã xác định chính xác vị trí kết thúc của dữ liệu thật, tránh bị nhầm lẫn với các byte 0x00 có sẵn trong dữ liệu gốc.
 
 ## 6. Tests bắt buộc
 
-Repo đã chuẩn bị 5 test shell cơ bản:
+Dự án bao gồm 5 kịch bản kiểm thử tự động để đảm bảo tính ổn định:
 
-- `tests/test_aes_compile.sh`
-- `tests/test_encrypt_decrypt_roundtrip.sh`
-- `tests/test_multiblock_padding.sh`
-- `tests/test_tamper_negative.sh`
-- `tests/test_wrong_key_negative.sh`
+**test_aes_compile.sh**: Kiểm tra khả năng biên dịch mã nguồn.
+
+**test_encrypt_decrypt_roundtrip.sh**: Kiểm tra tính toàn vẹn của dữ liệu sau khi mã hóa và giải mã.
+
+**test_multiblock_padding.sh**: Kiểm tra xử lý dữ liệu dài (nhiều block 16-byte).
+
+**test_tamper_negative.sh**: Kiểm tra phản ứng khi file ciphertext bị chỉnh sửa trái phép.
+
+**test_wrong_key_negative.sh**: Kiểm tra lỗi khi dùng sai khóa giải mã.
 
 Chạy toàn bộ test:
 
@@ -111,43 +117,41 @@ make test
 
 ## 7. Logs / Minh chứng
 
-Thư mục `logs/` dùng để lưu minh chứng học tập, ví dụ:
+Thư mục `logs/` chứa các kết quả thực thi thực tế phục vụ cho việc chấm bài:
 
-- output khi build chương trình
-- output khi encrypt/decrypt thành công
-- output khi test sai khóa
-- output khi test ciphertext bị sửa/tamper
-- ảnh chụp màn hình hoặc log terminal khi nộp bài
+- Báo cáo build chương trình thành công.
+
+- Log quá trình mã hóa/giải mã thành công.
+
+- Minh chứng các trường hợp test lỗi (sai khóa, sửa file).
 
 ## 8. Ethics & Safe use
+- Chỉ sử dụng cho mục đích học tập và nghiên cứu.
 
-- Chỉ chạy và kiểm thử trên dữ liệu học tập hoặc dữ liệu giả lập.
-- Không dùng repo này để tấn công, che giấu dữ liệu vi phạm hoặc can thiệp hệ thống thật.
-- Không trình bày đây là công cụ bảo mật sẵn sàng cho môi trường sản xuất.
-- Nếu tham khảo mã, tài liệu, công cụ hoặc AI, phải ghi nguồn rõ ràng.
-- Khi cộng tác nhóm, cần trung thực học thuật và mô tả đúng phần việc của mình.
+- Không sử dụng mã nguồn này cho các hệ thống bảo mật thực tế hoặc mục đích can thiệp trái phép.
+
+- Phải trích dẫn nguồn rõ ràng nếu tham khảo từ các tài liệu bên ngoài hoặc công cụ hỗ trợ.
+
+- Tuân thủ quy định về trung thực học thuật.
 
 ## 9. Checklist nộp bài
 
 Trước khi nộp, sinh viên cần có:
+[x] Có đầy đủ: encrypt.cpp, decrypt.cpp, structures.h.
 
-- `encrypt.cpp`, `decrypt.cpp`, `structures.h`
-- `README.md` đã mô tả rõ cách chạy, input, output, padding
-- `report-1page.md` đã hoàn thiện
-- `tests/` có ít nhất 5 test
-- có negative test cho `tamper` và `wrong key`
-- `logs/` có ít nhất 1 file minh chứng thật
-- không còn dòng `TODO_STUDENT` trong README/report/tests
+[x] File README.md đã mô tả đúng các bước và cơ chế padding.
+
+[x] Hoàn thiện file báo cáo nội bộ report-1page.md.
+
+[x] Chạy thành công ít nhất 5 loại test.
+
+[x] Thư mục logs/ có minh chứng chạy thực tế.
+
+[x] Đã xóa toàn bộ các dòng đánh dấu TODO_STUDENT.
 
 ## 10. Lưu ý kỹ thuật
+- Đã chuyển đổi thành công từ Zero Padding sang PKCS#7 Padding.
 
-Bản code này phục vụ mục tiêu học thuật để sinh viên quan sát các bước cơ bản của AES-128: SubBytes, ShiftRows, MixColumns, AddRoundKey và KeyExpansion.
+- Cấu trúc code được tổ chức lại để tránh lỗi Scope khi biên dịch.
 
-Một số điểm sinh viên có thể cải tiến:
-
-- tách code thành thư viện thay vì để nhiều logic trong `main`
-- đọc/ghi binary an toàn hơn thay vì phụ thuộc vào chuỗi C-style
-- chuyển từ zero padding sang PKCS#7 padding
-- thêm chế độ nhập key từ bàn phím
-- thêm mode lựa chọn encrypt/decrypt trong một chương trình duy nhất
-- kiểm thử bằng known answer test vector chuẩn AES
+- Cơ chế ghi file sử dụng chế độ Binary để đảm bảo tính chính xác cho các byte đặc biệt.
