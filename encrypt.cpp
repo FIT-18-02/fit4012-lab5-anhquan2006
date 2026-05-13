@@ -28,7 +28,8 @@ void ShiftRows(unsigned char * state) {
     tmp[8] = state[8]; tmp[9] = state[13]; tmp[10] = state[2]; tmp[11] = state[7];
     tmp[12] = state[12]; tmp[13] = state[1]; tmp[14] = state[6]; tmp[15] = state[11];
     
-    for (int i = 0; i < 16; i++) state[i] = tmp[i]; // Đã thêm dấu = để sửa lỗi image_4a3659.png
+    // Đã sửa lỗi thiếu dấu '=' gây lỗi build ở image_4a2758.png
+    for (int i = 0; i < 16; i++) state[i] = tmp[i]; 
 }
 
 void MixColumns(unsigned char * state) {
@@ -76,6 +77,10 @@ void AESEncrypt(unsigned char * message, unsigned char * expandedKey, unsigned c
 /* --- PHẦN 2: HÀM MAIN --- */
 
 int main() {
+    // QUAN TRỌNG: Phải gọi buildTables() để khởi tạo mul2, mul3
+    // Nếu không có dòng này, các bảng mul2/mul3 sẽ mang giá trị rác hoặc lỗi link
+    buildTables();
+
     cout << "=============================" << endl;
     cout << " 128-bit AES Encryption Tool   " << endl;
     cout << "=============================" << endl;
