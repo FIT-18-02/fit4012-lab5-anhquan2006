@@ -7,7 +7,7 @@
 
 using namespace std;
 
-/* --- PHẦN 1: CÁC HÀM XỬ LÝ AES (ĐƯA LÊN TRƯỚC MAIN ĐỂ TRÁNH LỖI SCOPE) --- */
+/* --- PHẦN 1: CÁC HÀM XỬ LÝ AES --- */
 
 void AddRoundKey(unsigned char * state, unsigned char * roundKey) {
     for (int i = 0; i < 16; i++) {
@@ -27,16 +27,21 @@ void ShiftRows(unsigned char * state) {
     tmp[4] = state[4]; tmp[5] = state[9]; tmp[6] = state[14]; tmp[7] = state[3];
     tmp[8] = state[8]; tmp[9] = state[13]; tmp[10] = state[2]; tmp[11] = state[7];
     tmp[12] = state[12]; tmp[13] = state[1]; tmp[14] = state[6]; tmp[15] = state[11];
-    for (int i = 0; i < 16; i++) state[i] tmp[i];
+    
+    for (int i = 0; i < 16; i++) state[i] = tmp[i]; // Đã thêm dấu = để sửa lỗi image_4a3659.png
 }
 
 void MixColumns(unsigned char * state) {
     unsigned char tmp[16];
-    tmp[0] = (unsigned char)mul2[state[0]] ^ mul3[state[1]] ^ state[2] ^ state[3];
-    tmp[1] = (unsigned char)state[0] ^ mul2[state[1]] ^ mul3[state[2]] ^ state[3];
-    tmp[2] = (unsigned char)state[0] ^ state[1] ^ mul2[state[2]] ^ mul3[state[3]];
-    tmp[3] = (unsigned char)mul3[state[0]] ^ state[1] ^ state[2] ^ mul2[state[3]];
-    // ... (Tương tự cho các cột còn lại như logic cũ của bạn)
+    
+    for (int i = 0; i < 4; i++) {
+        int offset = i * 4;
+        tmp[offset + 0] = (unsigned char)(mul2[state[offset + 0]] ^ mul3[state[offset + 1]] ^ state[offset + 2] ^ state[offset + 3]);
+        tmp[offset + 1] = (unsigned char)(state[offset + 0] ^ mul2[state[offset + 1]] ^ mul3[state[offset + 2]] ^ state[offset + 3]);
+        tmp[offset + 2] = (unsigned char)(state[offset + 0] ^ state[offset + 1] ^ mul2[state[offset + 2]] ^ mul3[state[offset + 3]]);
+        tmp[offset + 3] = (unsigned char)(mul3[state[offset + 0]] ^ state[offset + 1] ^ state[offset + 2] ^ mul2[state[offset + 3]]);
+    }
+    
     for (int i = 0; i < 16; i++) state[i] = tmp[i];
 }
 
@@ -56,11 +61,15 @@ void FinalRound(unsigned char * state, unsigned char * key) {
 void AESEncrypt(unsigned char * message, unsigned char * expandedKey, unsigned char * encryptedMessage) {
     unsigned char state[16];
     for (int i = 0; i < 16; i++) state[i] = message[i];
+    
     AddRoundKey(state, expandedKey);
+    
     for (int i = 0; i < 9; i++) {
         Round(state, expandedKey + (16 * (i + 1)));
     }
+    
     FinalRound(state, expandedKey + 160);
+    
     for (int i = 0; i < 16; i++) encryptedMessage[i] = state[i];
 }
 
@@ -73,7 +82,9 @@ int main() {
 
     char message[1024];
     cout << "Enter the message to encrypt: ";
-    cin.getline(message, sizeof(message));
+    if (!cin.getline(message, sizeof(message))) {
+        return 0;
+    }
 
     int originalLen = strlen(message);
     int paddingVal = 16 - (originalLen % 16);
@@ -98,6 +109,7 @@ int main() {
         infile.close();
     } else {
         cout << "Error: Unable to open keyfile" << endl;
+        delete[] paddedMessage;
         return 1;
     }
 
