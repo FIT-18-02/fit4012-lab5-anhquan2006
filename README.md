@@ -1,4 +1,4 @@
-# FIT4012 - Lab 5: AES-128 (Phạm Anh Quân - 1871020471)
+# FIT4012 - Lab 5: AES-128 (Nguyễn Anh Dũng - 1871020167)
 
 ## 1. Cấu trúc repo
 Dự án được tổ chức theo cấu trúc chuẩn của FIT4012 bao gồm các thành phần mã nguồn, kịch bản kiểm thử và tài liệu hướng dẫn.
@@ -17,7 +17,7 @@ Lệnh biên dịch thủ công (chuẩn C++17):
 - g++ -std=c++17 -Wall -Wextra -pedantic decrypt.cpp -o decrypt
 - Sau đó chạy: echo "hello FIT4012 AES" | ./encrypt
 - Và: ./decrypt
-//hi
+
 ## 3. Input / Output
 - Đầu vào (Input):
     - encrypt.cpp: Nhận văn bản trực tiếp từ bàn phím qua cin.getline().
