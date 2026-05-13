@@ -247,6 +247,6 @@ void KeyExpansion(unsigned char inputKey[16], unsigned char expandedKeys[176]) {
 
 	}
 }
-
+//quan
 #endif /* STRUCTURES_H */
 // Final update.
