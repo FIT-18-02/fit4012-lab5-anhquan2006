@@ -7,7 +7,7 @@
 
 using namespace std;
 
-/* --- CÁC HÀM XỬ LÝ (GIỮ NGUYÊN) --- */
+/* --- CÁC HÀM XỬ LÝ GIẢI MÃ --- */
 
 void SubRoundKey(unsigned char * state, unsigned char * roundKey) {
     for (int i = 0; i < 16; i++) state[i] ^= roundKey[i];
@@ -60,7 +60,7 @@ void AESDecrypt(unsigned char * encryptedMessage, unsigned char * expandedKey, u
     for (int i = 0; i < 16; i++) decryptedMessage[i] = state[i];
 }
 
-/* --- HÀM MAIN (ĐÃ SỬA LOGIC IN ẤN) --- */
+/* --- HÀM MAIN --- */
 
 int main() {
     buildTables();
@@ -71,6 +71,10 @@ int main() {
     Header head;
     infile.read((char*)&head, sizeof(Header));
     int cipherLen = head.ciphertext_len;
+    
+    // Kiểm tra độ dài cipherLen hợp lệ (chia hết cho 16)
+    if (cipherLen <= 0 || cipherLen % 16 != 0) return 1;
+
     unsigned char * encryptedMessage = new unsigned char[cipherLen];
     infile.read((char*)encryptedMessage, cipherLen);
     infile.close();
@@ -93,36 +97,43 @@ int main() {
         AESDecrypt(encryptedMessage + i, expandedKey, decryptedData + i);
     }
 
-    // --- KIỂM TRA PADDING ---
+    // --- KIỂM TRA PADDING PKCS#7 NGHIÊM NGẶT ---
     int paddingVal = (int)decryptedData[cipherLen - 1];
     bool isValid = (paddingVal >= 1 && paddingVal <= 16);
+    
     if (isValid) {
         for (int i = 0; i < paddingVal; i++) {
             if (decryptedData[cipherLen - 1 - i] != (unsigned char)paddingVal) {
-                isValid = false; break;
+                isValid = false; 
+                break;
             }
         }
     }
 
-    // NẾU SAI PADDING -> THOÁT NGAY, KHÔNG IN GÌ CẢ
+    // Nếu dữ liệu bị hỏng (Padding sai), giải phóng bộ nhớ và thoát ngay
     if (!isValid) {
         delete[] encryptedMessage;
         delete[] decryptedData;
         return 1; 
     }
 
-    // NẾU ĐÚNG PADDING -> MỚI IN KẾT QUẢ
+    // --- CHỈ IN KẾT QUẢ KHI DỮ LIỆU CHUẨN ---
     cout << "=============================" << endl;
     cout << " 128-bit AES Decryption Tool " << endl;
     cout << "=============================" << endl;
     
     int actualLen = cipherLen - paddingVal;
+    
     cout << "Decrypted message (hex): ";
-    for (int i = 0; i < actualLen; i++) cout << hex << setw(2) << setfill('0') << (int)decryptedData[i] << " ";
+    for (int i = 0; i < actualLen; i++) {
+        cout << hex << setw(2) << setfill('0') << (int)decryptedData[i] << " ";
+    }
     cout << endl;
 
     cout << "Decrypted message: ";
-    for (int i = 0; i < actualLen; i++) cout << (char)decryptedData[i];
+    for (int i = 0; i < actualLen; i++) {
+        cout << (char)decryptedData[i];
+    }
     cout << endl;
 
     delete[] encryptedMessage;
