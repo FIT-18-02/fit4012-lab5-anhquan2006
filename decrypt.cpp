@@ -7,14 +7,12 @@
 
 using namespace std;
 
-/* --- PHẦN 1: CÁC HÀM XỬ LÝ GIẢI MÃ --- */
+/* --- CÁC HÀM XỬ LÝ (GIỮ NGUYÊN) --- */
 
 void SubRoundKey(unsigned char * state, unsigned char * roundKey) {
-    for (int i = 0; i < 16; i++) {
-        state[i] ^= roundKey[i];
-    }
+    for (int i = 0; i < 16; i++) state[i] ^= roundKey[i];
 }
-//quan
+
 void InverseMixColumns(unsigned char * state) {
     unsigned char tmp[16];
     for (int i = 0; i < 4; i++) {
@@ -57,14 +55,12 @@ void AESDecrypt(unsigned char * encryptedMessage, unsigned char * expandedKey, u
     unsigned char state[16];
     for (int i = 0; i < 16; i++) state[i] = encryptedMessage[i];
     InitialRound(state, expandedKey + 160);
-    for (int i = 8; i >= 0; i--) {
-        Round(state, expandedKey + (16 * (i + 1)));
-    }
+    for (int i = 8; i >= 0; i--) Round(state, expandedKey + (16 * (i + 1)));
     SubRoundKey(state, expandedKey);
     for (int i = 0; i < 16; i++) decryptedMessage[i] = state[i];
 }
 
-/* --- PHẦN 2: HÀM MAIN --- */
+/* --- HÀM MAIN (ĐÃ SỬA LOGIC IN ẤN) --- */
 
 int main() {
     buildTables();
@@ -74,7 +70,6 @@ int main() {
 
     Header head;
     infile.read((char*)&head, sizeof(Header));
-    
     int cipherLen = head.ciphertext_len;
     unsigned char * encryptedMessage = new unsigned char[cipherLen];
     infile.read((char*)encryptedMessage, cipherLen);
@@ -83,13 +78,10 @@ int main() {
     unsigned char key[16] = {0};
     ifstream keyfile("keyfile");
     if (keyfile.is_open()) {
-        string keystr;
-        getline(keyfile, keystr);
+        string keystr; getline(keyfile, keystr);
         istringstream iss(keystr);
         unsigned int c;
-        for (int i = 0; i < 16 && (iss >> hex >> c); i++) {
-            key[i] = (unsigned char)c;
-        }
+        for (int i = 0; i < 16 && (iss >> hex >> c); i++) key[i] = (unsigned char)c;
         keyfile.close();
     }
 
@@ -101,47 +93,36 @@ int main() {
         AESDecrypt(encryptedMessage + i, expandedKey, decryptedData + i);
     }
 
-    // --- KIỂM TRA PADDING NGHIÊM NGẶT ---
+    // --- KIỂM TRA PADDING ---
     int paddingVal = (int)decryptedData[cipherLen - 1];
-    bool isValidPadding = true;
-
-    if (paddingVal < 1 || paddingVal > 16) {
-        isValidPadding = false;
-    } else {
+    bool isValid = (paddingVal >= 1 && paddingVal <= 16);
+    if (isValid) {
         for (int i = 0; i < paddingVal; i++) {
             if (decryptedData[cipherLen - 1 - i] != (unsigned char)paddingVal) {
-                isValidPadding = false;
-                break;
+                isValid = false; break;
             }
         }
     }
 
-    if (!isValidPadding) {
-        // Nếu hỏng dữ liệu, thoát ngay lập tức và không in gì cả
+    // NẾU SAI PADDING -> THOÁT NGAY, KHÔNG IN GÌ CẢ
+    if (!isValid) {
         delete[] encryptedMessage;
         delete[] decryptedData;
         return 1; 
     }
 
-    // Chỉ khi dữ liệu an toàn mới in các thông báo này
+    // NẾU ĐÚNG PADDING -> MỚI IN KẾT QUẢ
     cout << "=============================" << endl;
     cout << " 128-bit AES Decryption Tool " << endl;
     cout << "=============================" << endl;
-    cout << "Read encrypted message from message.aes (" << cipherLen << " bytes)" << endl;
-    cout << "Read 128-bit key from keyfile" << endl;
-
+    
     int actualLen = cipherLen - paddingVal;
-
     cout << "Decrypted message (hex): ";
-    for (int i = 0; i < actualLen; i++) {
-        cout << hex << setw(2) << setfill('0') << (int)decryptedData[i] << " ";
-    }
+    for (int i = 0; i < actualLen; i++) cout << hex << setw(2) << setfill('0') << (int)decryptedData[i] << " ";
     cout << endl;
 
     cout << "Decrypted message: ";
-    for (int i = 0; i < actualLen; i++) {
-        cout << (char)decryptedData[i];
-    }
+    for (int i = 0; i < actualLen; i++) cout << (char)decryptedData[i];
     cout << endl;
 
     delete[] encryptedMessage;
