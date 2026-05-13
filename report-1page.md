@@ -1,38 +1,60 @@
-# Report 1 page - Lab 4 AES-128
-## Thông tin sinh viên
-Họ và tên: Phạm Anh Quân
+# Report 1 page - Lab 5 AES-128
 
-Mã sinh viên: 1871020471
+## Student Information
 
-Lớp: CNT18-02
+- Full Name: Phạm Anh Quân
+- Student ID:1871020471
+
+---
+
 ## Mục tiêu
-Bài thực hành giúp sinh viên hiểu sâu về quy trình mã hóa và giải mã AES-128 bit, bao gồm việc tự triển khai các hàm biến đổi trạng thái (State), mở rộng khóa (Key Expansion) và cơ chế đóng gói gói tin (Packet encapsulation) để truyền dữ liệu an toàn.
+
+Bài thực hành giúp sinh viên hiểu quy trình mã hóa và giải mã AES-128 ở mức nhập môn, bao gồm xử lý block 128-bit, mở rộng khóa, các phép biến đổi theo vòng và cơ chế padding đơn giản.
+
 ## Cách làm / Method
-Hệ thống được triển khai bằng ngôn ngữ C++ với các thành phần chính:
 
-**structures.h**: Định nghĩa cấu trúc Header (chứa IV và độ dài dữ liệu) giúp bên nhận xử lý chính xác bản mã. Chứa các bảng tra cứu (S-box, MixColumns) và hàm KeyExpansion.
+Repo sử dụng 3 file mã nguồn chính: `encrypt.cpp`, `decrypt.cpp`, `structures.h`.
 
-**encrypt.cpp**: Thực hiện mã hóa AES-CBC. Sử dụng chuẩn PKCS#7 Padding để đảm bảo dữ liệu luôn là bội số của 16 byte và an toàn hơn so với null-padding.
+- `encrypt.cpp` thực hiện mã hóa plaintext và ghi ciphertext ra file `message.aes`
+- `decrypt.cpp` đọc file `message.aes` để giải mã
+- `structures.h` chứa S-box, inverse S-box, bảng tra cứu GF(2^8), RCon và hàm KeyExpansion
 
-**decrypt.cpp**: Đọc Header từ file message.aes, thực hiện giải mã ngược và loại bỏ padding để khôi phục plaintext nguyên bản.
-
-**Testing**: Sử dụng các script trong thư mục tests/ để kiểm tra tính đúng đắn qua nhiều kịch bản (Multi-block, Wrong key, Tamper dữ liệu).
-
-Repo được cấu trúc lại theo mẫu starter repo của FIT4012 Lab 4: có `Makefile`, `CMakeLists.txt`, thư mục `tests/`, `logs/`, `scripts/` và GitHub Actions CI.
+Repo được tổ chức theo starter repository của FIT4012 với:
+- `Makefile`
+- `CMakeLists.txt`
+- thư mục `tests/`
+- thư mục `logs/`
+- GitHub Actions CI workflow
 
 ## Kết quả / Result
-**Biên dịch**: Thành công bằng Makefile và CMake.
 
-**Mã hóa/Giải mã**: Đã kiểm thử với chuỗi plaintext dài, chương trình khôi phục chính xác 100% dữ liệu gốc nhờ cơ chế PKCS#7.
+Chương trình hỗ trợ:
+- AES-128 encryption
+- AES-128 decryption
+- zero padding cho plaintext nhiều block
+- đọc khóa từ file `keyfile`
+- ghi ciphertext ra file `message.aes`
 
-**Negative Test**:
-
-Khi dùng Wrong Key, chương trình phát hiện sai lệch dữ liệu sau giải mã.
-
-Khi Tamper (chỉnh sửa file message.aes), chương trình báo lỗi do sai cấu trúc hoặc lỗi unpadding.
-
-**Logs**: Các minh chứng thực hiện được lưu đầy đủ trong thư mục logs/
+Các test cơ bản trong repo gồm:
+- compile test
+- encrypt/decrypt roundtrip test
+- multiblock padding test
+- tamper negative test
+- wrong key negative test
 
 ## Kết luận / Conclusion
-Bài lab đã hoàn thành đầy đủ các yêu cầu về bảo mật cơ bản. Việc sử dụng struct Header và chuẩn padding quốc tế (PKCS#7) giúp hệ thống hoạt động ổn định và chuyên nghiệp hơn. Đây là nền tảng quan trọng để tiếp cận các giao thức truyền tin an toàn trong môn học Cybersecurity.
-//quan
+
+Bài lab giúp minh họa quy trình hoạt động cơ bản của AES-128 gồm:
+- SubBytes
+- ShiftRows
+- MixColumns
+- AddRoundKey
+- KeyExpansion
+
+Ngoài ra bài lab cũng cho thấy hạn chế của cách đọc/ghi binary bằng C-style string và zero padding. Trong tương lai có thể cải tiến bằng:
+- PKCS#7 padding
+- binary-safe file handling
+- chuẩn hóa test vector AES
+- gom encrypt/decrypt vào một chương trình duy nhất
+
+This lab repository was tested with compile, round-trip, multiblock, tamper and wrong-key scenarios.
